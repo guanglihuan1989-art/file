@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DESIGN & PHOTOGRAPHY | 徐慧作品集</title>
+    <style>
+        /* --- 1. Mac/Safari 字体渲染优化 + 异步字体防抖 --- */
+        @font-face {
+            font-family: 'Noto Serif SC';
+            src: local('Source Han Serif CN'), local('Noto Serif CJK SC');
+            font-display: swap;
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html{
+            scroll-behavior:smooth;
+            /* Mac Safari 平滑滚动增强 */
+            -webkit-overflow-scrolling: touch;
+        }
+        :root {
+            --bg-canvas: #E6DFD4;     /* 高级画廊暖砂岩墙面色 */
+            --bg-card: #FAF6EE;       /* 温润手工卡纸白 */
+            --text-dark: #322A22;     /* 深烧炭褐黑 */
+            --text-muted: #8C7B6B;    /* 建筑测绘铜灰 */
+            --line-solid: #322A22;    /* 刚性结构线 */
+            --line-light: #D6CDBF;    /* 墙面测绘辅助线 */
+            --line-grid: rgba(50, 42, 34, 0.04);
+            --cb-gallery: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        body{
+            background: var(--bg-canvas);
+            background-image: 
+                linear-gradient(to right, var(--line-grid) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--line-grid) 1px, transparent 1px);
+            background-size: 50px 50px; 
+            /* Mac 优先苹方字体 */
+            font-family: "PingFang SC", "Helvetica Neue", -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.8;
+            /* Mac 文字抗锯齿，解决字体发灰发虚 */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+        }
+        /* GPU加速优化，修复Safari动画掉帧 */
+        .content img {
+            will-change: transform, opacity, filter;
+            transform: translateZ(0);
+        }
+        .content img.loaded { 
+            opacity: 1 !important;
+        }
+        /* Mac+手机 图片防盗：右键/拖拽/长按保存全部拦截 */
+        .content img, #bigImg {
+            pointer-events: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;    
+            user-select: none;            
+        }
+        /* 移动端汉堡按钮 */
+        .menu-btn{
+            position: fixed; top: 25px; right: 25px; width: 44px; height: 44px;
+            background: var(--bg-card); border: 1px solid var(--text-dark);
+            display: none; align-items: center; justify-content: center;
+            font-size: 14px; color: var(--text-dark); z-index: 9999; cursor: pointer;
+        }
+        /* 左侧侧边栏 */
+        .sidebar{
+            position: fixed; top: 0; left: 0; width: 280px; height: 100vh;
+            background: var(--bg-card); border-right: 1px solid var(--line-light);
+            padding: 80px 40px; z-index: 999;
+            transition: transform 0.6s var(--cb-gallery);
+            transform: translateZ(0);
+        }
+        .sidebar::after {
+            content: ''; position: absolute; top: 0; right: 5px; width: 1px; height: 100%;
+            background: var(--line-grid);
+        }
+        .sidebar .logo{
+            font-family: "Noto Serif SC", "Georgia", serif; font-size: 16px; font-weight: 700;
+            color: var(--text-dark); letter-spacing: 5px; margin-bottom: 80px;
+            text-align: center; text-transform: uppercase;
+        }
+        .nav{ display: flex; flex-direction: column; gap: 4px; }
+        .nav a{
+            padding: 14px 20px; text-decoration: none; color: var(--text-muted);
+            font-size: 13px; text-align: left; letter-spacing: 3px; font-weight: 500; position: relative;
+            transition: color 0.4s var(--cb-gallery), padding-left 0.4s var(--cb-gallery);
+        }
+        .nav a:hover{ color: var(--text-dark); padding-left: 26px; }
+        .nav a::before {
+            content: ''; position: absolute; left: 0; top: 0; width: 2px; height: 0; 
+            background: var(--line-solid);
+            transition: height 0.4s var(--cb-gallery); 
+        }
+        .nav a.active{ color: var(--text-dark); font-weight: 700; background: var(--bg-canvas); }
+        .nav a:hover::before,
+        .nav a.active::before {
+            height: 100%; 
+        }
+        /* 主内容区域 */
+        .content{ margin-left: 280px; padding: 100px 60px; min-height: 100vh; }
+        /* 滚动入场动画 */
+        .reveal {
+            opacity: 0; transform: translateY(30px); margin-bottom: 140px; 
+            transition: opacity 1s var(--cb-gallery), transform 1s var(--cb-gallery);
+        }
+        .reveal.reveal-active { opacity: 1; transform: translateY(0); }
+        /* 章节标题样式 */
+        .section-title{
+            font-family: "Noto Serif SC", "Source Han Serif CN", serif; font-size: 18px; font-weight: 700;
+            color: var(--text-dark); margin-bottom: 50px; letter-spacing: 3px; display: flex; align-items: center; gap: 20px;
+        }
+        .section-title::before { content: '┠'; font-family: monospace; color: var(--text-dark); }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: var(--line-solid); }
+        /* 动态视频板块 */
+        .video-show{ margin-bottom:30px; }
+        .video-main{
+            width:100%; height:500px; overflow:hidden; margin-bottom:25px;
+            background: #000; border: 1px solid var(--text-dark);
+        }
+        .video-main video{ 
+            width:100%; height:100%; object-fit: contain;
+            /* Mac Safari 视频渲染修复 */
+            -webkit-transform: translateZ(0);
+        }
+        .video-thumbs{ display: flex; gap: 8px; flex-wrap: wrap; }
+        .video-thumb{
+            padding: 8px 18px; background: var(--bg-card); border: 1px solid var(--line-light);
+            cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px;
+            transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+        }
+        .video-thumb:hover { border-color: var(--text-dark); color: var(--text-dark); }
+        .video-thumb.active{ background: var(--text-dark); color: var(--bg-card); border-color: var(--text-dark); }
+        /* 平面设计瀑布流 4列 */
+        .filter-menu {
+            display: flex; gap: 10px; margin-bottom: 45px; padding: 15px 0; flex-wrap: wrap;
+            border-top: 1px solid var(--text-dark); border-bottom: 1px dashed var(--line-light);
+        }
+        .filter-btn {
+            background: transparent; border: 1px dashed var(--line-light); padding: 8px 22px;
+            font-size: 11px; letter-spacing: 2px; color: var(--text-muted); cursor: pointer; font-weight: 600;
+            transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+        }
+        .filter-btn:hover { border-color: var(--text-dark); color: var(--text-dark); }
+        .filter-btn.active { background: var(--text-dark); color: var(--bg-card); border-color: var(--text-dark); }
+        .gallery { column-count: 4; column-gap: 32px; position: relative; }
+        .gallery .card { break-inside: avoid; display: block; width: 100%; margin-bottom: 35px; position: relative; cursor: pointer; }
+        .gallery .card.hide { display: none !important; }
+        .card::before, .card::after {
+            content: ''; position: absolute; width: 12px; height: 12px; opacity: 0.25; pointer-events: none; z-index: 3;
+            transition: top 0.4s var(--cb-gallery), left 0.4s var(--cb-gallery), right 0.4s var(--cb-gallery), bottom 0.4s var(--cb-gallery), opacity 0.4s var(--cb-gallery);
+        }
+        .card::before { top: -5px; left: -5px; border-top: 1px solid var(--text-dark); border-left: 1px solid var(--text-dark); }
+        .card::after { bottom: -5px; right: -5px; border-bottom: 1px solid var(--text-dark); border-right: 1px solid var(--text-dark); }
+        .card-inner {
+            width: 100%; height: auto; display: flex; flex-direction: column;
+            background: var(--bg-card); border: 1px solid var(--line-light);
+            padding: 10px 10px 38px 10px; position: relative;
+            box-shadow: 0 6px 20px rgba(50, 42, 34, 0.02), 0 1px 2px rgba(50, 42, 34, 0.01);
+            transition: border-color 0.4s ease, transform 0.5s var(--cb-gallery), box-shadow 0.5s ease;
+            will-change: transform, box-shadow;
+            transform: translateZ(0);
+        }
+        .card-img-wrapper { 
+            width: 100%; min-height: 120px; position: relative; background: rgba(50, 42, 34, 0.02); 
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .card img {
+            max-width: 100%; height: auto; display: block; margin: 0 auto;
+            filter: grayscale(5%) sepia(3%) contrast(98%); opacity: 0;
+            transition: opacity 0.4s ease, transform 0.5s var(--cb-gallery), filter 0.5s ease;
+        }
+        .gallery .card-meta {
+            position: absolute; bottom: 10px; left: 12px; right: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: monospace; font-size: 9px; letter-spacing: 1.5px;
+            color: var(--text-muted); border-top: 1px solid rgba(50, 42, 34, 0.05);
+            padding-top: 6px; text-transform: uppercase;
+        }
+        .gallery .card-meta::before { content: '┼'; font-size: 8px; }
+        .gallery .card:hover .card-inner { border-color: var(--text-dark); transform: translateY(-6px); box-shadow: 0 20px 40px rgba(50, 42, 34, 0.06); }
+        .gallery .card:hover::before { top: 1px; left: 1px; opacity: 1; }   
+        .gallery .card:hover::after { bottom: 1px; right: 1px; opacity: 1; } 
+        .gallery .card:hover img { filter: grayscale(0%) sepia(0%) contrast(100%); }
+        /* 摄影3列瀑布流 */
+        .photo-gallery-masonry { column-count: 3; column-gap: 40px; position: relative; }
+        .photo-gallery-masonry .card { break-inside: avoid; display: block; width: 100%; margin-bottom: 40px; position: relative; cursor: pointer; }
+        .photo-gallery-masonry .card::before, .photo-gallery-masonry .card::after {
+            content: ''; position: absolute; width: 12px; height: 12px; opacity: 0.25; pointer-events: none; z-index: 3;
+            transition: top 0.4s var(--cb-gallery), left 0.4s var(--cb-gallery), right 0.4s var(--cb-gallery), bottom 0.4s var(--cb-gallery), opacity 0.4s var(--cb-gallery);
+        }
+        .photo-gallery-masonry .card::before { top: -5px; left: -5px; border-top: 1px solid var(--text-dark); border-left: 1px solid var(--text-dark); }
+        .photo-gallery-masonry .card::after { bottom: -5px; right: -5px; border-bottom: 1px solid var(--text-dark); border-right: 1px solid var(--text-dark); }
+        .photo-gallery-masonry .card-inner {
+            width: 100%; height: auto; background: var(--bg-card); border: 1px solid var(--line-light); padding: 12px; position: relative;
+            box-shadow: 0 6px 25px rgba(50, 42, 34, 0.02); overflow: hidden;
+            transition: border-color 0.4s ease, transform 0.5s var(--cb-gallery), box-shadow 0.5s ease;
+            will-change: transform, box-shadow;
+            transform: translateZ(0);
+        }
+        .photo-gallery-masonry .card-img-wrapper {
+            width: 100%; position: relative;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        }
+        .photo-gallery-masonry .card img {
+            max-width: 100%; height: auto; display: block; margin: 0 auto;
+            filter: grayscale(6%) sepia(2%) contrast(97%); opacity: 0;
+            transition: opacity 0.4s ease, transform 0.6s var(--cb-gallery), filter 0.6s ease;
+        }
+        .photo-gallery-masonry .card-meta {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            font-family: monospace; font-size: 10px; letter-spacing: 1px; color: #FAF6EE;
+            background: linear-gradient(to top, rgba(50, 42, 34, 0.8), rgba(50, 42, 34, 0));
+            padding: 30px 20px 15px 20px; opacity: 0; transform: translateY(8px); pointer-events: none; z-index: 4; border-top: none;
+            transition: opacity 0.4s var(--cb-gallery), transform 0.4s var(--cb-gallery);
+        }
+        .photo-gallery-masonry .card-meta::before { display: none; }
+        .photo-gallery-masonry .card:hover .card-inner { border-color: var(--text-dark); transform: translateY(-6px); box-shadow: 0 25px 45px rgba(50, 42, 34, 0.08); }
+        .photo-gallery-masonry .card:hover::before { top: 1px; left: 1px; opacity: 1; }   
+        .photo-gallery-masonry .card:hover::after { bottom: 1px; right: 1px; opacity: 1; } 
+        .photo-gallery-masonry .card:hover img { filter: grayscale(0%) sepia(0%) contrast(100%); transform: scale(1.03); }
+        .photo-gallery-masonry .card:hover .card-meta { opacity: 1; transform: translateY(0); }
+        /* 加载更多按钮 */
+        .load-container { display: flex; justify-content: center; margin-top: 60px; }
+        .load-more-btn {
+            background: transparent; border: 1px solid var(--text-dark); padding: 14px 45px;
+            font-size: 11px; letter-spacing: 4px; font-weight: 700; color: var(--text-dark); cursor: pointer; text-transform: uppercase;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .load-more-btn:hover { background: var(--text-dark); color: var(--bg-card); }
+        /* 大图弹窗 Mac模糊兼容 */
+        .img-popup{
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(42, 38, 34, 0.0); backdrop-filter: blur(0px);
+            /* Safari 兼容模糊 */
+            -webkit-backdrop-filter: blur(0px);
+            z-index: 99999;
+            padding: 40px; opacity: 0; visibility: hidden; cursor: zoom-out;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s var(--cb-gallery), visibility 0.5s var(--cb-gallery), backdrop-filter 0.5s var(--cb-gallery), -webkit-backdrop-filter 0.5s var(--cb-gallery);
+        }
+        .img-popup img{
+            max-width: 92%; max-height: 92%; object-fit: contain; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 30px 70px rgba(0,0,0,0.3);
+            transform: scale(0.9); margin: auto;           
+            transition: transform 0.5s var(--cb-gallery);
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="%23FAF6EE" stroke-width="4" fill="none" stroke-dasharray="150 100"><animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="0.8s" repeatCount="indefinite" /></circle></svg>') center no-repeat;
+        }
+        .img-popup.active{ 
+            opacity: 1; visibility: visible; background: rgba(42, 38, 34, 0.93); 
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .img-popup.active img { transform: scale(1); }
+        /* 页脚 */
+        .footer{ text-align:center; padding:100px 0 40px; color:var(--text-muted); font-size:11px; letter-spacing: 3px; border-top: 1px dashed var(--text-dark); text-transform: uppercase; }
+        /* 响应式适配 */
+        @media (max-width:1400px) { .gallery { column-count: 3; gap: 24px; } .photo-gallery-masonry { column-count: 3; gap: 30px; } }
+        @media (max-width:1100px) {
+            .sidebar{ width: 240px; padding: 40px 20px; } .content{ margin-left: 240px; padding: 80px 30px; }
+            .gallery { column-count: 2; gap: 20px; } .photo-gallery-masonry { column-count: 2; gap: 24px; }
+        }
+        @media (max-width:768px) {
+            .menu-btn{ display:flex; } .sidebar{ transform: translateX(-100%); width: 260px; box-shadow: 15px 0 40px rgba(42,38,34,0.04); }
+            .sidebar.show{ transform: translateX(0); } 
+            .content{ margin-left: 0; padding: 100px 16px 40px; } .video-main{ height:230px; } .reveal { margin-bottom: 70px; }
+            .section-title { margin-bottom: 30px; }
+            .gallery { column-count: 2; column-gap: 16px; } 
+            .gallery .card { margin-bottom: 18px; }
+            .gallery .card-inner { padding: 6px 6px 28px 6px; }
+            .gallery .card-meta { bottom: 6px; left: 8px; right: 8px; font-size: 8px; letter-spacing: 0.5px; }
+            .photo-gallery-masonry { column-count: 2; column-gap: 16px; }
+            .photo-gallery-masonry .card { margin-bottom: 18px; }
+            .photo-gallery-masonry .card-inner { padding: 6px; }
+            .photo-gallery-masonry .card-meta { padding: 20px 8px 6px 8px; font-size: 8px; letter-spacing: 0.5px; }
+            .gallery .card:hover::before, .photo-gallery-masonry .card:hover::before { top: -5px; left: -5px; }
+            .gallery .card:hover::after, .photo-gallery-masonry .card:hover::after { bottom: -5px; right: -5px; }
+            .load-container { margin-top: 30px; }
+            .load-more-btn { width: 100%; text-align: center; padding: 12px 0; }
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-btn" id="menuBtn">☰ MENU</button>
+    <div class="sidebar" id="sidebar">
+        <div class="logo">XU HUI / DESIGN</div>
+        <div class="nav" id="navLinks">
+            <a href="#home" class="active">首页</a>
+            <a href="#video">动态视频</a>
+            <a href="#poster">平面海报</a>
+            <a href="#photography">摄影图集</a> 
+            <a href="#about">关于我</a>
+        </div>
+    </div>
+    <div class="content">
+        <!-- 首页 -->
+        <section class="section reveal" id="home" style="min-height: 40vh; display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--text-dark); padding-left: 40px;">
+            <h1 style="font-family: 'Noto Serif SC', serif; font-size:40px; font-weight:700; color:var(--text-dark); margin-bottom:15px; letter-spacing: 4px;">
+                徐慧设计摄影集
+            </h1>
+            <p style="color:var(--text-muted); font-size:11px; letter-spacing: 5px; text-transform: uppercase; font-family: monospace;">
+                Structural Geometry & Organic Compilations
+            </p>
+        </section>
+
+        <!-- ========== 视频（CDN链接） ========== -->
+        <section class="section reveal" id="video">
+            <h2 class="section-title">动态视频作品</h2>
+            <div class="video-show">
+                <div class="video-main">
+                    <video id="mainVideo" controls preload="metadata"  muted playsinline loop src="https://cloud.video.taobao.com/vod/eAmIxIYXIUEYSLNpMmKZ8LldLq8Kon1NP9aVTyjO9K4.mp4"></video>
+                </div>
+                <div class="video-thumbs">
+                    <!-- 视频使用CDN链接 -->
+                    <div class="video-thumb" data-src="https://cloud.video.taobao.com/vod/eAmIxIYXIUEYSLNpMmKZ8LldLq8Kon1NP9aVTyjO9K4.mp4">· 达摩院</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 平面设计作品（CDN链接） ========== -->
+        <section class="section reveal" id="poster">
+            <h2 class="section-title">平面设计作品</h2>
+            <div class="filter-menu">
+                <button class="filter-btn active" data-target="all">INDEX / 全部</button>
+                <button class="filter-btn" data-target="img1">PART 01 / 系列壹</button>
+                <button class="filter-btn" data-target="img2">PART 02 / 系列貳</button>
+                <button class="filter-btn" data-target="img3">PART 03 / 系列叁</button>
+            </div>
+            <div class="gallery" id="galleryGrid">
+                <!-- 图片使用CDN链接，data-src=懒加载地址 data-full=点击放大地址 -->
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OdP6DB1sszRcHvQSU_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OdP6DB1sszRcHvQSU_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OdP6DB1sszRcHvQSU_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01I1pLpd1sszRc9CoV4_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01I1pLpd1sszRc9CoV4_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01I1pLpd1sszRc9CoV4_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN013uTgec1sszRcG5M0b_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN013uTgec1sszRcG5M0b_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN013uTgec1sszRcG5M0b_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01w1SLFJ1sszRcCMrqv_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01w1SLFJ1sszRcCMrqv_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01w1SLFJ1sszRcCMrqv_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01gxySNU1sszRcblQJN_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01gxySNU1sszRcblQJN_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01gxySNU1sszRcblQJN_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01lDMHE31sszRc9CXtf_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01lDMHE31sszRc9CXtf_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01lDMHE31sszRc9CXtf_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+               <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01G2GLc81sszRcMTofT_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01G2GLc81sszRcMTofT_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01G2GLc81sszRcMTofT_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN018wt94s1sszRcUP1gJ_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN018wt94s1sszRcUP1gJ_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN018wt94s1sszRcUP1gJ_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01kguiE21sszRcbmpcP_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01kguiE21sszRcbmpcP_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01kguiE21sszRcbmpcP_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01OYkb2Y1sszRc7EVYB_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01OYkb2Y1sszRc7EVYB_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01OYkb2Y1sszRc7EVYB_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01ftk4gp1sszRcMTcCf_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01ftk4gp1sszRcMTcCf_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01ftk4gp1sszRcMTcCf_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01oaLtmM1sszRc9Dou1_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01oaLtmM1sszRc9Dou1_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01oaLtmM1sszRc9Dou1_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01qhsgMe1sszRcOJV8f_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01qhsgMe1sszRcOJV8f_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01qhsgMe1sszRcOJV8f_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01DAfWhl1sszRcMQb5d_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01DAfWhl1sszRcMQb5d_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01DAfWhl1sszRcMQb5d_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img1">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01jnrkXK1sszRcCNfl0_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01jnrkXK1sszRcCNfl0_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01jnrkXK1sszRcCNfl0_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-01</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01PlhTW91sszRcdeVIW_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01PlhTW91sszRcdeVIW_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01PlhTW91sszRcdeVIW_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01hdftXV1sszRY0CyZ8_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01hdftXV1sszRY0CyZ8_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01hdftXV1sszRY0CyZ8_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN010BWRbi1sszRcNfkAm_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN010BWRbi1sszRcNfkAm_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN010BWRbi1sszRcNfkAm_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01ivNJEs1sszRcEF8w8_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01ivNJEs1sszRcEF8w8_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01ivNJEs1sszRcEF8w8_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01uCwZe91sszRcOPJkJ_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01uCwZe91sszRcOPJkJ_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01uCwZe91sszRcOPJkJ_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01Rp3yLq1sszRcI0WL8_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01Rp3yLq1sszRcI0WL8_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01Rp3yLq1sszRcI0WL8_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN0163X9uq1sszRcO7XvH_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN0163X9uq1sszRcO7XvH_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN0163X9uq1sszRcO7XvH_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01o5nj5I1sszRd0KPaq_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01o5nj5I1sszRd0KPaq_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01o5nj5I1sszRd0KPaq_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01AOAobj1sszRY08TaK_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01AOAobj1sszRY08TaK_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01AOAobj1sszRY08TaK_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01wwIQTj1sszRcB1CLc_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01wwIQTj1sszRcB1CLc_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01wwIQTj1sszRcB1CLc_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01IWYubj1sszRc99TA7_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01IWYubj1sszRc99TA7_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01IWYubj1sszRc99TA7_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01qfWPoL1sszRcOOFEI_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01qfWPoL1sszRcOOFEI_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01qfWPoL1sszRcOOFEI_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01rPqXef1sszRY08PSD_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01rPqXef1sszRY08PSD_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01rPqXef1sszRY08PSD_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01xXjHPA1sszRcYVPB0_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01xXjHPA1sszRcYVPB0_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01xXjHPA1sszRcYVPB0_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img2">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                             <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OhPjxZ1sszRd0K8yr_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OhPjxZ1sszRd0K8yr_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OhPjxZ1sszRd0K8yr_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-02</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01whIqkZ1sszRd0RGIE_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01whIqkZ1sszRd0RGIE_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01whIqkZ1sszRd0RGIE_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01L0ohbv1sszRcNoGmh_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01L0ohbv1sszRcNoGmh_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01L0ohbv1sszRcNoGmh_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01Hjh3Fh1sszRcWPYoV_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01Hjh3Fh1sszRcWPYoV_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01Hjh3Fh1sszRcWPYoV_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01byMVzW1sszRcYfXWE_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01byMVzW1sszRcYfXWE_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01byMVzW1sszRcYfXWE_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01zIrhqK1sszRcOG0Su_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01zIrhqK1sszRcOG0Su_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01zIrhqK1sszRcOG0Su_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01pdWMfI1sszRcdmpSy_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01pdWMfI1sszRcdmpSy_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01pdWMfI1sszRcdmpSy_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01NFhGcS1sszRe0daVZ_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01NFhGcS1sszRe0daVZ_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01NFhGcS1sszRe0daVZ_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN015K4Xju1sszRcXa7Qn_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN015K4Xju1sszRcXa7Qn_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN015K4Xju1sszRcXa7Qn_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01mWswQi1sszRY1iMGD_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01mWswQi1sszRY1iMGD_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01mWswQi1sszRY1iMGD_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01wyWEWp1sszRcXiyg7_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01wyWEWp1sszRcXiyg7_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01wyWEWp1sszRcXiyg7_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="/Users/jianbingguozi/Documents" data-src="img3/53.png" data-full="img3/53.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01PoQZPg1sszRcAeaOx_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01PoQZPg1sszRcAeaOx_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01PoQZPg1sszRcAeaOx_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ATge571sszRcQ4Ils_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ATge571sszRcQ4Ils_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ATge571sszRcQ4Ils_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ATge571sszRcQ4Ils_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ATge571sszRcQ4Ils_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ATge571sszRcQ4Ils_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01q1JxcG1sszRcfI52R_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01q1JxcG1sszRcfI52R_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01q1JxcG1sszRcfI52R_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01IYlnub1sszRcFr6mB_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01IYlnub1sszRcFr6mB_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01IYlnub1sszRcFr6mB_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN016yaSic1sszRe24LDr_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN016yaSic1sszRe24LDr_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN016yaSic1sszRe24LDr_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gVHfya1sszRca8ZeW_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gVHfya1sszRca8ZeW_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gVHfya1sszRca8ZeW_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01GLKfBo1sszRcPyrdY_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01GLKfBo1sszRcPyrdY_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01GLKfBo1sszRcPyrdY_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01915edW1sszRY1jdFS_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01915edW1sszRY1jdFS_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01915edW1sszRY1jdFS_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01fxhtip1sszRcfEO2J_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01fxhtip1sszRcfEO2J_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01fxhtip1sszRcfEO2J_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01ZaK1wp1sszRe25LcN_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01ZaK1wp1sszRe25LcN_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01ZaK1wp1sszRe25LcN_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN011YKifW1sszRe2598p_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN011YKifW1sszRe2598p_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN011YKifW1sszRe2598p_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01dZ8RxM1sszRcCcgfd_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01dZ8RxM1sszRcCcgfd_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01dZ8RxM1sszRcCcgfd_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01Xj5ad81sszRcCZjhS_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01Xj5ad81sszRcCZjhS_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01Xj5ad81sszRcCZjhS_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01VPBrxW1sszRca7MqY_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01VPBrxW1sszRca7MqY_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01VPBrxW1sszRca7MqY_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01fG76Ro1sszRcP9eTL_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01fG76Ro1sszRcP9eTL_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01fG76Ro1sszRcP9eTL_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01zol9Fg1sszRe25PpS_!!767245823.png" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01zol9Fg1sszRe25PpS_!!767245823.png" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01zol9Fg1sszRe25PpS_!!767245823.png">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01E7Dj6h1sszRcJa02I_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01E7Dj6h1sszRcJa02I_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01E7Dj6h1sszRcJa02I_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01pUOK9j1sszRca6d7x_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01pUOK9j1sszRca6d7x_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01pUOK9j1sszRca6d7x_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+                <div class="card" data-cat="img3">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN011zzgfg1sszRd1ttMO_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN011zzgfg1sszRd1ttMO_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN011zzgfg1sszRd1ttMO_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>img-03</span><span>archive</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="load-container" id="loadContainer">
+                <button class="load-more-btn" id="loadMoreBtn">[ LOAD MORE / 載入更多 ]</button>
+            </div>
+        </section>
+
+        <!-- ========== 工作日常Plog（CDN链接） ========== -->
+        <section class="section reveal" id="photography">
+            <h2 class="section-title">工作日常Plog</h2>
+            <div class="photo-gallery-masonry" id="photoGrid">
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01rxcD7R1sszRe2OPaW_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01rxcD7R1sszRe2OPaW_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01rxcD7R1sszRe2OPaW_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 100</span><span>f/2.8 1/250s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01QKSEuo1sszRcB0XOu_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01QKSEuo1sszRcB0XOu_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01QKSEuo1sszRcB0XOu_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01832rbn1sszRcPPtoI_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01832rbn1sszRcPPtoI_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01832rbn1sszRcPPtoI_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01IcfFat1sszRcJv0fu_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01IcfFat1sszRcJv0fu_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01IcfFat1sszRcJv0fu_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN0176viij1sszRcY37U9_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN0176viij1sszRcY37U9_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN0176viij1sszRcY37U9_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01xHgJKu1sszRcPPMZ0_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01xHgJKu1sszRcPPMZ0_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01xHgJKu1sszRcPPMZ0_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01fDniSq1sszRcLWB97_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01fDniSq1sszRcLWB97_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01fDniSq1sszRcLWB97_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN0187GabI1sszRcYAvNK_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN0187GabI1sszRcYAvNK_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN0187GabI1sszRcYAvNK_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01yhBqjl1sszRcG5Xdg_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01yhBqjl1sszRcG5Xdg_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01yhBqjl1sszRcG5Xdg_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01VFghy91sszRcLWVvD_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01VFghy91sszRcLWVvD_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01VFghy91sszRcLWVvD_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01niL8L61sszRcaOcWt_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01niL8L61sszRcaOcWt_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01niL8L61sszRcaOcWt_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01TI8fqd1sszRcPQATb_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01TI8fqd1sszRcPQATb_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01TI8fqd1sszRcPQATb_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01gjmnWf1sszRcG8Dy9_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01gjmnWf1sszRcG8Dy9_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01gjmnWf1sszRcG8Dy9_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01622joI1sszRcLWz1X_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01622joI1sszRcLWz1X_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01622joI1sszRcLWz1X_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01Zg9nQT1sszRcB2534_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01Zg9nQT1sszRcB2534_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01Zg9nQT1sszRcB2534_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01KWT1ry1sszRcCtTIx_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01KWT1ry1sszRcCtTIx_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01KWT1ry1sszRcCtTIx_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01k5mdqO1sszRcB2cKk_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01k5mdqO1sszRcB2cKk_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01k5mdqO1sszRcB2cKk_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OEi0tH1sszRcPyohe_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OEi0tH1sszRcPyohe_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01OEi0tH1sszRcPyohe_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gXg5Ve1sszRe2Ms1n_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gXg5Ve1sszRe2Ms1n_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gXg5Ve1sszRe2Ms1n_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01xSP9561sszRd29fbz_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01xSP9561sszRd29fbz_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01xSP9561sszRd29fbz_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 200</span><span>f/4.0 1/160s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN018iPAlP1sszRcCu8wo_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN018iPAlP1sszRcCu8wo_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN018iPAlP1sszRcCu8wo_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01D9z6gG1sszRcfVJ1r_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01D9z6gG1sszRcfVJ1r_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01D9z6gG1sszRcfVJ1r_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01C0xAdS1sszRcQKc3d_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01C0xAdS1sszRcQKc3d_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01C0xAdS1sszRcQKc3d_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN018H3AJB1sszRcJw5ID_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN018H3AJB1sszRcJw5ID_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN018H3AJB1sszRcJw5ID_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01WFKGXk1sszRcPQhoW_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01WFKGXk1sszRcPQhoW_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01WFKGXk1sszRcPQhoW_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01uUsTNZ1sszRcQHawo_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01uUsTNZ1sszRcQHawo_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01uUsTNZ1sszRcQHawo_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN0154aM3F1sszRe2Nwad_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN0154aM3F1sszRe2Nwad_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN0154aM3F1sszRe2Nwad_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01EZdN3R1sszRcQJL4n_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01EZdN3R1sszRcQJL4n_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01EZdN3R1sszRcQJL4n_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN013umqpS1sszRcQGaYO_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN013umqpS1sszRcQGaYO_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN013umqpS1sszRcQGaYO_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01GXgwRY1sszRcRzQN8_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01GXgwRY1sszRcRzQN8_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01GXgwRY1sszRcRzQN8_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01xbm2X51sszRcQK0dx_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01xbm2X51sszRcQK0dx_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01xbm2X51sszRcQK0dx_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN0191AIn91sszRcPRAvv_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN0191AIn91sszRcPRAvv_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN0191AIn91sszRcPRAvv_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ZFgqq71sszRcS22VN_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ZFgqq71sszRcS22VN_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01ZFgqq71sszRcS22VN_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN011qtcL71sszRcPz5Pp_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN011qtcL71sszRcPz5Pp_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN011qtcL71sszRcPz5Pp_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01Y22hQW1sszRcfXaPv_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01Y22hQW1sszRcfXaPv_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01Y22hQW1sszRcfXaPv_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01rTrPUN1sszRcfYrTv_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01rTrPUN1sszRcfYrTv_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01rTrPUN1sszRcfYrTv_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01g8u1AA1sszRcS2yov_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01g8u1AA1sszRcS2yov_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01g8u1AA1sszRcS2yov_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01EDufEA1sszRcQK4tC_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01EDufEA1sszRcQK4tC_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01EDufEA1sszRcQK4tC_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN018dmvpT1sszRcfVdvn_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN018dmvpT1sszRcfVdvn_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN018dmvpT1sszRcfVdvn_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN0109eSEF1sszRcaQQyf_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN0109eSEF1sszRcaQQyf_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN0109eSEF1sszRcaQQyf_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01CDbeBl1sszRcG8xtH_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01CDbeBl1sszRcG8xtH_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01CDbeBl1sszRcG8xtH_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01SA9lH11sszRe2OTzc_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01SA9lH11sszRe2OTzc_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01SA9lH11sszRe2OTzc_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01P3WaIw1sszRcGBFEP_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01P3WaIw1sszRcGBFEP_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01P3WaIw1sszRcGBFEP_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01W2V14n1sszRcQM1W1_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01W2V14n1sszRcQM1W1_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01W2V14n1sszRcQM1W1_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01CCeYBL1sszRY22UsC_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01CCeYBL1sszRY22UsC_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01CCeYBL1sszRY22UsC_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01TcTLwX1sszRcaQdUB_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01TcTLwX1sszRcaQdUB_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01TcTLwX1sszRcaQdUB_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01kgcW3q1sszRe2P1Hs_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01kgcW3q1sszRe2P1Hs_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01kgcW3q1sszRe2P1Hs_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01eMZF9R1sszRcG9lnz_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01eMZF9R1sszRcG9lnz_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01eMZF9R1sszRcG9lnz_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01swIozG1sszRcPUSkM_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01swIozG1sszRcPUSkM_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01swIozG1sszRcPUSkM_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01ekuU8N1sszRcJz2Nh_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01ekuU8N1sszRcJz2Nh_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01ekuU8N1sszRcJz2Nh_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01k9ZKSP1sszRcQKogQ_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01k9ZKSP1sszRcQKogQ_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01k9ZKSP1sszRcQKogQ_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01z4ENkU1sszRcPSifd_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01z4ENkU1sszRcPSifd_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01z4ENkU1sszRcPSifd_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN016eutTt1sszRcLZnqZ_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN016eutTt1sszRcLZnqZ_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN016eutTt1sszRcLZnqZ_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN013OW4zO1sszRcCv18B_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN013OW4zO1sszRcCv18B_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN013OW4zO1sszRcCv18B_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01Ai0znY1sszRcLZfYl_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01Ai0znY1sszRcLZfYl_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01Ai0znY1sszRcLZfYl_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01IWBDPM1sszRcPV01d_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i3/767245823/O1CN01IWBDPM1sszRcPV01d_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i3/767245823/O1CN01IWBDPM1sszRcPV01d_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01J0WAeg1sszRcfWz6m_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i4/767245823/O1CN01J0WAeg1sszRcfWz6m_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i4/767245823/O1CN01J0WAeg1sszRcfWz6m_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gu07T41sszRcG9pyQ_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gu07T41sszRcG9pyQ_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i2/767245823/O1CN01gu07T41sszRcG9pyQ_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-img-wrapper">
+                            <img src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01gjxmTj1sszRcLd1TP_!!767245823.jpg" data-src="https://img.alicdn.com/imgextra/i1/767245823/O1CN01gjxmTj1sszRcLd1TP_!!767245823.jpg" data-full="https://img.alicdn.com/imgextra/i1/767245823/O1CN01gjxmTj1sszRcLd1TP_!!767245823.jpg">
+                        </div>
+                        <div class="card-meta"><span>ISO 400</span><span>f/2.8 1/200s</span></div>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!-- 关于我 -->
+        <section class="section reveal" id="about">
+            <h2 class="section-title">关于我</h2>
+            <p style="font-family: 'Noto Serif SC', serif; font-size:18px; font-weight:700; color:var(--text-dark); letter-spacing: 2px; line-height: 1.6; border-left: 3px solid var(--line-solid); padding-left: 24px;">
+                以视觉为语，融极简意境，于方寸之间雕琢设计本心。
+            </p>
+            <p style="margin-top:20px; line-height:2;">
+                徐慧 | 视觉设计 & 活动摄影<br>
+                擅长品牌平面、动态短片、人文静物摄影，坚持几何极简与自然质感融合的视觉表达。
+            </p>
+        </section>
+
+        <!-- 页脚版权统一徐慧 -->
+        <div class="footer">
+            © XU HUI PORTFOLIO · MINIMAL VISUAL DESIGN
+        </div>
+    </div>
+    <!-- 大图弹窗容器 -->
+    <div class="img-popup" id="imgPopup">
+        <img src="" id="bigImg" alt="作品放大预览">
+    </div>
+    <script>
+        // 移动端侧边栏菜单
+        const menuBtn = document.getElementById('menuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const navLinks = document.querySelectorAll('.nav a');
+        menuBtn.addEventListener('click', (e) => {
+            sidebar.classList.toggle('show');
+            e.stopPropagation();
+        }, {passive: true});
+        document.addEventListener('click', () => sidebar.classList.remove('show'), {passive: true});
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => sidebar.classList.remove('show'), {passive: true});
+        });
+        // 视频切换
+        const thumbs = document.querySelectorAll('.video-thumb');
+        const mainVideo = document.getElementById('mainVideo');
+        thumbs.forEach(thumb => {
+            thumb.addEventListener('click', () => {
+                thumbs.forEach(t => t.classList.remove('active'));
+                thumb.classList.add('active');
+                mainVideo.src = thumb.dataset.src;
+                mainVideo.load();
+                mainVideo.play();
+            }, {passive: true});
+        });
+        // 图片弹窗预览
+        const popup = document.getElementById('imgPopup');
+        const bigImg = document.getElementById('bigImg');
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const img = card.querySelector('img');
+                if(img) {
+                    bigImg.src = img.dataset.full ? img.dataset.full : img.src;
+                    popup.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    e.stopPropagation();
+                }
+            }, {passive: true});
+        });
+        popup.addEventListener('click', () => {
+            popup.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => { bigImg.src = ''; }, 400); 
+        }, {passive: true});
+        // 平面作品筛选 + 加载更多
+        const filterBtns = document.querySelectorAll('.filter-menu .filter-btn');
+        const galleryCards = document.querySelectorAll('#galleryGrid .card');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const loadContainer = document.getElementById('loadContainer');
+        let initialLimit = 12; 
+        let currentFilter = 'all';
+        function renderGallery() {
+            let visibleIndex = 0; 
+            galleryCards.forEach(card => {
+                const matchesCategory = currentFilter === 'all' || card.dataset.cat === currentFilter;
+                if (matchesCategory) {
+                    if (currentFilter === 'all') {
+                        if (visibleIndex < initialLimit) {
+                            card.classList.remove('hide');
+                            visibleIndex++;
+                        } else {
+                            card.classList.add('hide');
+                        }
+                    } else {
+                        card.classList.remove('hide');
+                        visibleIndex++;
+                    }
+                } else {
+                    card.classList.add('hide');
+                }
+            });
+            loadContainer.style.display = (currentFilter === 'all' && initialLimit < galleryCards.length) ? 'flex' : 'none';
+            if (typeof window.triggerLazyLoad === 'function') window.triggerLazyLoad();
+        }
+        loadMoreBtn.addEventListener('click', () => {
+            initialLimit += 12; 
+            renderGallery();
+        }, {passive: true});
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.target;
+                if (currentFilter === 'all') initialLimit = 12; 
+                renderGallery();
+            }, {passive: true});
+        });
+        // 图片懒加载（Mac Safari兼容IntersectionObserver）
+        const allLazyImgs = document.querySelectorAll('.content img[data-src]');
+        const imgObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    const forceShowTimeout = setTimeout(() => img.classList.add('loaded'), 1500); 
+                    img.onload = () => { clearTimeout(forceShowTimeout); img.classList.add('loaded'); };
+                    img.onerror = () => { clearTimeout(forceShowTimeout); img.classList.add('loaded'); };
+                    observer.unobserve(img);
+                }
+            });
+        }, { root: null, rootMargin: '200px 0px 400px 0px', threshold: 0.01 });
+        window.triggerLazyLoad = function() {
+            allLazyImgs.forEach(img => {
+                if (!img.closest('.card').classList.contains('hide')) imgObserver.observe(img);
+            });
+        };
+        renderGallery();
+        // 滚动导航高亮
+        const reveals = document.querySelectorAll('.reveal');
+        const globalObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-active');
+                    const id = entry.target.getAttribute('id');
+                    updateNav(id);
+                }
+            });
+        }, { root: null, rootMargin: '-15% 0px -30% 0px', threshold: 0.02 });
+        reveals.forEach(el => globalObserver.observe(el));
+        function updateNav(id) {
+            navLinks.forEach(link => {
+                link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+            });
+        }
+        // Mac 触控板/浏览器防盗：禁止右键、拖拽图片
+        document.addEventListener('contextmenu', function(e) {
+            if (e.target.tagName === 'IMG') e.preventDefault(); 
+        });
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.tagName === 'IMG') e.preventDefault(); 
+        });
+    </script>
+</body>
+</html>
